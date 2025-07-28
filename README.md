@@ -2,10 +2,8 @@
 
 Welcome to **QuickAI**, a powerful, all-in-one **AI SaaS platform** built to boost your productivity and creativity. Whether you're a content creator, job seeker, or designer — QuickAI offers lightning-fast tools to get your work done with intelligence.
 
-![QuickAI Banner]
 
-
----<img width="1895" height="969" alt="Screenshot 2025-07-28 200459" src="https://github.com/user-attachments/assets/845e3676-bebd-4283-9586-1ac5c20790d8" />
+<img width="1895" height="969" alt="Screenshot 2025-07-28 200459" src="https://github.com/user-attachments/assets/845e3676-bebd-4283-9586-1ac5c20790d8" />
 
 
 ## 🚀 Features
