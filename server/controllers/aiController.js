@@ -24,6 +24,8 @@ export const generateArticle = async (req, res)=> {
             return res.json({sucess: false, message: 'Limit reached. Upgrade to continue.'})
         }
 
+        const maxTokens = Math.ceil(length * 1.5);
+
         const response = await AI.chat.completions.create({
             model: "gemini-2.0-flash",
             messages: [{
@@ -32,7 +34,7 @@ export const generateArticle = async (req, res)=> {
                 },
             ],
             temperature: 0.7,
-            max_tokens: length,
+            max_tokens: maxTokens,
         });
 
         const content = response.choices[0].message.content

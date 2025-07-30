@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import {Edit, Sparkles} from 'lucide-react'
+import {Copy, Edit, Sparkles} from 'lucide-react'
 
 import axios from 'axios'
 import { useAuth } from '@clerk/clerk-react';
@@ -22,6 +22,25 @@ const WriteArticle = () => {
   const [content, setContent] = useState('')
 
   const {getToken} = useAuth()
+
+  const copyToClipboard = async () => {
+    try {
+      const plainText = content
+        .replace(/#{1,6}\s+/g, '')
+        .replace(/\*\*(.*?)\*\*/g, '$1')
+        .replace(/\*(.*?)\*/g, '$1')
+        .replace(/`(.*?)`/g, '$1')
+        .replace(/```[\s\S]*?```/g, '')
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') 
+        .replace(/\n\s*\n/g, '\n\n') 
+        .trim();
+      await navigator.clipboard.writeText(plainText);
+      toast.success('Article copied to clipboard');
+    } catch (error) {
+      toast.error('Failed to copy to clipboard')
+      
+    }
+  };
 
   const onSubmitHandler = async (e)=>{
     e.preventDefault();
@@ -70,10 +89,21 @@ const WriteArticle = () => {
       </form>
       {/* right column */}
       <div className='w-full max-w-lg p-4 bg-white rounded-lg flex flex-col border border-gray-200 min-h-96 max-h-[600px]'>
-        <div className='flex items-center gap-3'>
-          <Edit  className='w-5 h-5 text-[#4A7AFF]'/>
-          <h1 className='text-xl font-semibold'>Generated Article</h1>
+        <div className='flex items-center justify-between'>
+          <div className='flex items-center gap-3'>
+            <Edit  className='w-5 h-5 text-[#4A7AFF]'/>
+            <h1 className='text-xl font-semibold'>Generated Article</h1>
+          </div>
+
+          {
+            content && (
+              <button onClick={copyToClipboard} className='flex items-center gap-2 px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md transition-colors' title='Copy to Clipboard'>
+                <Copy className='w-4 h-4' />
+                Copy
+              </button>
+            )}
         </div>
+
 
         {!content ? (
           <div className='flex-1 flex justify-center items-center'>
