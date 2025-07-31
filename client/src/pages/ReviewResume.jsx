@@ -8,6 +8,26 @@ import Markdown from 'react-markdown';
 axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
 
 const ReviewResume = () => {
+  const jobRoles = [
+    {role: 'frontend-developer', text: 'Frontend Developer'},
+    {role: 'backend-developer', text: 'Backend Developer'},
+    {role: 'fullstack-developer', text: 'Full Stack Developer'},
+    {role: 'mobile-developer', text: 'Mobile Developer'},
+    {role: 'devops-engineer', text: 'DevOps Engineer'},
+    {role: 'data-scientist', text: 'Data Scientist'},
+    {role: 'machine-learning-engineer', text: 'ML Engineer'},
+    {role: 'software-architect', text: 'Software Architect'},
+    {role: 'product-manager', text: 'Product Manager'},
+    {role: 'ui-ux-designer', text: 'UI/UX Designer'},
+    {role: 'qa-engineer', text: 'QA Engineer'},
+    {role: 'cybersecurity-analyst', text: 'Cybersecurity Analyst'},
+    {role: 'cloud-engineer', text: 'Cloud Engineer'},
+    {role: 'blockchain-developer', text: 'Blockchain Developer'},
+    {role: 'game-developer', text: 'Game Developer'},
+    {role: 'embedded-systems-engineer', text: 'Embedded Systems Engineer'}
+  ]
+
+  const [selectedJobRole, setSelectedJobRole] = useState(jobRoles[0])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [content, setContent] = useState('')
@@ -19,6 +39,7 @@ const ReviewResume = () => {
 
               const formData = new FormData()
               formData.append('resume', input)
+              formData.append('jobRole', selectedJobRole.role)
 
               const {data} = await axios.post('/api/ai/resume-review', formData,
               {headers: {Authorization: `Bearer ${await getToken()}`}})
@@ -40,6 +61,12 @@ const ReviewResume = () => {
         <div className='flex items-center gap-3'>
           <Sparkles className='w-6 text-[#00DA83]'/>
           <h1 className='text-xl font-semibold'>Resume Review</h1>
+        </div>
+        <p className='mt-6 text-sm font-medium'>Target Job Roles</p>
+        <div className='mt-3 flex gap-3 flex-wrap sm:max-w-9/11'>
+          {jobRoles.map((item, index)=>(
+            <span onClick={()=> setSelectedJobRole(item)} className={`text-xs px-4 py-1 border rounded-full cursor-pointer ${selectedJobRole.text === item.text ? 'bg-green-50 text-green-700 border-green-300': 'text-gray-500 border-gray-300'}`} key={index}>{item.text}</span>
+          ))}
         </div>
         <p className='mt-6 text-sm font-medium'>Upload Resume</p>
         <input onChange={(e)=>setInput(e.target.files[0])} type='file' accept='application/pdf' className='w-full p-2 px-3 mt-2 outline-none text-sm rounded-md border border-gray-300 text-gray-600' required/>

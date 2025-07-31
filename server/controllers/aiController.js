@@ -213,6 +213,7 @@ export const resumeReview = async (req, res) => {
   try {
     const {userId} = req.auth();
     const resume = req.file;
+    const {jobRole} = req.body;
     const plan = req.plan;
 
     if(plan !== 'exclusive'){
@@ -226,7 +227,137 @@ export const resumeReview = async (req, res) => {
     const dataBuffer = fs.readFileSync(resume.path)
     const pdfData = await pdf(dataBuffer)
 
-    const prompt = `Review the following resume and provide constructive feedback on its strengths, weakness, and areas for improvements. Resume Content:\n\n${pdfData.text}`
+    const roleSpecificPrompts = {
+      'frontend-developer': `Review this resume for a Frontend Developer position. Focus on:
+- HTML, CSS, JavaScript, React, Vue, Angular, or other frontend frameworks
+- Responsive design and mobile-first development
+- Performance optimization and accessibility
+- Modern frontend build tools and workflows
+- UI/UX principles and design systems`,
+      
+      'backend-developer': `Review this resume for a Backend Developer position. Focus on:
+- Server-side programming languages (Node.js, Python, Java, C#, etc.)
+- Database design and management (SQL, NoSQL)
+- API development and RESTful services
+- Authentication and security practices
+- System architecture and scalability`,
+      
+      'fullstack-developer': `Review this resume for a Full Stack Developer position. Focus on:
+- Both frontend and backend technologies
+- Database design and API development
+- Modern development frameworks and tools
+- DevOps practices and deployment
+- End-to-end application development`,
+      
+      'mobile-developer': `Review this resume for a Mobile Developer position. Focus on:
+- iOS development (Swift, Objective-C) or Android development (Kotlin, Java)
+- Cross-platform frameworks (React Native, Flutter, Xamarin)
+- Mobile app architecture and design patterns
+- App store deployment and distribution
+- Mobile-specific performance optimization`,
+      
+      'devops-engineer': `Review this resume for a DevOps Engineer position. Focus on:
+- CI/CD pipelines and automation tools
+- Cloud platforms (AWS, Azure, GCP)
+- Containerization (Docker, Kubernetes)
+- Infrastructure as Code (Terraform, CloudFormation)
+- Monitoring, logging, and observability`,
+      
+      'data-scientist': `Review this resume for a Data Scientist position. Focus on:
+- Statistical analysis and machine learning
+- Programming languages (Python, R, SQL)
+- Data visualization and storytelling
+- Big data technologies (Hadoop, Spark)
+- Business intelligence and analytics`,
+      
+      'machine-learning-engineer': `Review this resume for a Machine Learning Engineer position. Focus on:
+- ML algorithms and model development
+- Deep learning frameworks (TensorFlow, PyTorch)
+- MLOps and model deployment
+- Data preprocessing and feature engineering
+- Model performance optimization`,
+      
+      'software-architect': `Review this resume for a Software Architect position. Focus on:
+- System design and architecture patterns
+- Scalability and performance considerations
+- Technology stack selection and evaluation
+- Code quality and maintainability
+- Technical leadership and mentoring`,
+      
+      'product-manager': `Review this resume for a Product Manager position. Focus on:
+- Product strategy and roadmap development
+- User research and market analysis
+- Agile methodologies and project management
+- Stakeholder communication and leadership
+- Data-driven decision making`,
+      
+      'ui-ux-designer': `Review this resume for a UI/UX Designer position. Focus on:
+- User interface design and prototyping
+- User experience research and testing
+- Design tools (Figma, Sketch, Adobe Creative Suite)
+- Design systems and component libraries
+- Accessibility and inclusive design`,
+      
+      'qa-engineer': `Review this resume for a QA Engineer position. Focus on:
+- Test planning and strategy
+- Manual and automated testing
+- Test automation frameworks (Selenium, Cypress, etc.)
+- Performance and security testing
+- Quality assurance processes`,
+      
+      'cybersecurity-analyst': `Review this resume for a Cybersecurity Analyst position. Focus on:
+- Security assessment and vulnerability analysis
+- Incident response and threat hunting
+- Security tools and technologies
+- Compliance and risk management
+- Network and application security`,
+      
+      'cloud-engineer': `Review this resume for a Cloud Engineer position. Focus on:
+- Cloud platform expertise (AWS, Azure, GCP)
+- Infrastructure design and deployment
+- Cloud security and compliance
+- Cost optimization and resource management
+- Multi-cloud and hybrid cloud solutions`,
+      
+      'blockchain-developer': `Review this resume for a Blockchain Developer position. Focus on:
+- Blockchain platforms (Ethereum, Solana, etc.)
+- Smart contract development
+- Cryptography and security
+- DeFi and Web3 technologies
+- Distributed systems and consensus mechanisms`,
+      
+      'game-developer': `Review this resume for a Game Developer position. Focus on:
+- Game engines (Unity, Unreal Engine)
+- Programming languages (C++, C#, Python)
+- Game design principles and mechanics
+- Graphics programming and optimization
+- Cross-platform game development`,
+      
+      'embedded-systems-engineer': `Review this resume for an Embedded Systems Engineer position. Focus on:
+- Microcontroller programming (Arduino, Raspberry Pi)
+- Real-time operating systems
+- Hardware-software integration
+- IoT and sensor technologies
+- Low-level programming and optimization`
+    };
+
+    const rolePrompt = roleSpecificPrompts[jobRole] || roleSpecificPrompts['fullstack-developer'];
+    
+    const prompt = `Review the following resume for a ${jobRole.replace('-', ' ')} position and provide constructive feedback on its strengths, weaknesses, and areas for improvement.
+
+${rolePrompt}
+
+Resume Content:
+${pdfData.text}
+
+Please provide a comprehensive analysis including:
+1. Overall assessment
+2. Strengths
+3. Areas for improvement
+4. Specific recommendations for the target role
+5. Skills and experience alignment with the job requirements`
+
+
     const response = await AI.chat.completions.create({
             model: "gemini-2.0-flash",
             messages: [{
@@ -235,12 +366,12 @@ export const resumeReview = async (req, res) => {
                 },
             ],
             temperature: 0.7,
-            max_tokens: 1000,
+            max_tokens: 3000,
         });
 
         const content = response.choices[0].message.content
 
-    await sql`INSERT INTO creations(user_id, prompt, content, type) VALUES (${userId}, 'Review the uploaded resume', ${content}, 'resume-review')`;
+    await sql`INSERT INTO creations(user_id, prompt, content, type) VALUES (${userId}, ${`Review resume for ${jobRole.replace('-', ' ')} position`}, ${content}, 'resume-review')`;
 
     res.json({success: true, content: content})
 
