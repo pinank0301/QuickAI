@@ -46,7 +46,7 @@ export const toogleLikeCreation = async (req, res)=> {
         let message;
 
         if(currentLikes.includes(userIdStr)){
-            updatedLikes = currentLikes.filter(()=>user !== userIdStr);
+            updatedLikes = currentLikes.filter((id)=> id !== userIdStr);
             message = 'Creation Unliked'
         }else{
             updatedLikes = [...currentLikes, userIdStr]

@@ -12,7 +12,7 @@ const Community = () => {
   const [creations, setCreations] = useState([])
   const {user} = useUser()
   const [loading, setLoading] = useState(true)
-  const {getToken} = useAuth()
+  const {getToken, userId} = useAuth()
   const fetchCreations = async () => {
     try {
       const {data} = await axios.get('/api/user/get-published-creations', {
@@ -63,7 +63,7 @@ const Community = () => {
               <p className='text-sm hidden group-hover:block'>{creation.prompt}</p>
               <div className='flex gap-1 items-center'>
                 <p>{creation.likes.length}</p>
-                <Heart onClick={()=> imageLikeToggle(creation.id)} className={`min-w-5 h-5 hover:scale-110 cursor-pointer ${creation.likes.includes(user.id) ? 'fill-red-500 text-red-600' : 'text-white'}`}/>
+                <Heart onClick={()=> imageLikeToggle(creation.id)} className={`min-w-5 h-5 hover:scale-110 cursor-pointer ${creation.likes.includes(userId) ? 'fill-red-500 text-red-600' : 'text-white'}`}/>
               </div>
             </div>
 
